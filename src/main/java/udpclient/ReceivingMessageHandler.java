@@ -2,9 +2,11 @@ package udpclient;
 
 import java.net.DatagramPacket;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+import static springboot.SpringBootWithShellApplication.tomcatPort;
 import static udpclient.Client.*;
 import static udpclient.Printer.*;
 import static udpclient.Util.*;
@@ -19,7 +21,7 @@ public class ReceivingMessageHandler {
             case 0:
                 registered=true;
                 print_Success("Registered");
-                print_nng("No neighbours have registered in Bootstrap server yet");
+                print_nng("No neighbours in BS yet");
                 break;
 
             case 1:
@@ -27,7 +29,7 @@ public class ReceivingMessageHandler {
                 registered=true;
                 Node neighbour= new Node(st.nextToken(),st.nextToken(),"");
 
-                addToRoutingTable(neighbour,"Bootstrap Server Response");
+                addToRoutingTable(neighbour,"BS Response");
                 print_n("");
                 break;
 
@@ -210,27 +212,17 @@ public class ReceivingMessageHandler {
                 if (no_of_files>0) {
                     print_Success("File Search");
 
-
-                    ArrayList<String> fileNames=new ArrayList<>();
-
-
-                    for (String s: msg.split("'")){
-                        fileNames.add(s);
-                    }
-
-
-                    //to have only file names
-                    fileNames.remove(0); //remove first part of the msg
-                    fileNames.remove(fileNames.size()-1); //remove last null item
+                    ArrayList<String> fileNames= (ArrayList<String>) divideHopsAndFiles(msg).get("files");
 
                     String filesStr = "";
-
                     for (String file : fileNames) {
                         filesStr += file + ", ";
                     }
-                    filesStr=filesStr.substring(0, filesStr.length() - 2); //remove last , and space
 
-                    print_nng("Neighbour " + ip_file_owner + ":" + port_file_owner + " has : " + filesStr);
+                    filesStr=filesStr.substring(0, filesStr.length() - 2); //remove last comma and space
+
+                    print_ng("Neighbour " + ip_file_owner + ":" + port_file_owner + " has : " + filesStr);
+                    print_nng("download http://" + ip_file_owner + ":" + port_file_owner + "/download?name=\"" + filesStr+"\"");
 
                     //collect data until hops==1
 
@@ -244,22 +236,33 @@ public class ReceivingMessageHandler {
 
         String ip_file_needed=st.nextToken();
         int port_file_needed= Integer.parseInt(st.nextToken());
-        String searchName=st.nextToken();
-        int hops= Integer.parseInt(st.nextToken());
+
+        HashMap<String, Object> filesAndHops = divideHopsAndFiles(incomeMessage);
+
+        String hopsStr = (String) filesAndHops.get("hops");
+        String searchName= ((ArrayList<String>) filesAndHops.get("files")).get(0);
+
+
+        int hops=1;
+        try {
+            hops= Integer.parseInt(hopsStr);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
 
         //searching files locally
         ArrayList<String> foundFiles = searchFile(searchName);
         String filesStr="";
 
         for (String file: foundFiles){
-            filesStr+="'"+file+ "' ";
+            filesStr+="\""+file+ "\" ";
         }
 
-        String msg="SEROK "+ foundFiles.size() + " " + myIp + " " + myPort +" " + hops + " " + filesStr ;
+        String msg="SEROK "+ foundFiles.size() + " " + myIp + " " + tomcatPort +" " + hops + " " + filesStr.trim() ;
         String msg_formatted = formatMessage(msg);
         sendPacket(ip_file_needed,port_file_needed,msg_formatted, "Search Ok");
 
-        print_ng("File data sent to "+ip_file_needed+":"+port_file_needed);
+        print_nng("File data sent to "+ip_file_needed+":"+port_file_needed);
 
         /*
         Manage hops
@@ -279,7 +282,7 @@ public class ReceivingMessageHandler {
                 }
             }
             if (forwardedHops==0){
-                print_ng("No other neighbours to forward this search");
+                print_nng("No other neighbours to forward this search");
             }
 
         }
