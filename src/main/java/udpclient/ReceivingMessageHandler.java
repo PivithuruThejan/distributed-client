@@ -9,6 +9,7 @@ import java.util.StringTokenizer;
 import static springboot.SpringBootWithShellApplication.tomcatPort;
 import static udpclient.Client.*;
 import static udpclient.Printer.*;
+import static udpclient.SendingMessageHandler.sendNeighboursToNeighbourMessage;
 import static udpclient.Util.*;
 
 public class ReceivingMessageHandler {
@@ -267,7 +268,7 @@ public class ReceivingMessageHandler {
          */
         if (hops>1){
             hops=hops-1;
-            String hopsMsg="SER " + ip_file_needed + " " + port_file_needed + " " + searchName + " " + hops;
+            String hopsMsg="SER " + ip_file_needed + " " + port_file_needed + " \"" + searchName + "\" " + hops;
             String msg_formattedForHops = formatMessage(hopsMsg);
 
             int forwardedHops=0;
@@ -314,4 +315,34 @@ public class ReceivingMessageHandler {
         print_n("");
 
     }
+
+    public static void handleGossipRequest(StringTokenizer st){
+        String ip_of_sender=st.nextToken();
+        String port_of_sender=st.nextToken();
+
+        Node gossipRquestedNode=new Node(ip_of_sender,port_of_sender,"");
+
+        addToRoutingTable(gossipRquestedNode,"Gossip request");
+
+        sendNeighboursForGossipRequest(gossipRquestedNode);
+
+    }
+
+    private static void sendNeighboursForGossipRequest(Node gossipRquestedNode) {
+        ArrayList<Node> allNeighbours = new ArrayList<>();
+        allNeighbours.addAll(getRoutingTable().values());
+        int count = 0;
+        String neighboursToBeSent = "";
+        for (Node n : allNeighbours) {
+            if (!gossipRquestedNode.isEqual(n.getIp(), n.getPort())) {
+                neighboursToBeSent += n.getIp() + " " + n.getPort() + " ";
+                count++;
+            } else {
+                continue;
+            }
+        }
+        neighboursToBeSent.substring(0, neighboursToBeSent.length() - 1); //remove last space
+        sendNeighboursToNeighbourMessage(gossipRquestedNode, count, neighboursToBeSent);
+    }
+
 }

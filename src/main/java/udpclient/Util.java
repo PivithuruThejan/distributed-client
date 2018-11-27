@@ -160,10 +160,14 @@ public class Util {
                 lastQuotationIndex=i;
             }
         }
-
-        String hopsStr = s.substring(lastQuotationIndex+1,s.length()).trim();
-        String[] filesStr= s.substring(firstQuotationIndex,lastQuotationIndex+1).split("\"");
-
+        String hopsStr="";
+        String[] filesStr={};
+        try {
+            hopsStr = s.substring(lastQuotationIndex + 1, s.length()).trim();
+            filesStr = s.substring(firstQuotationIndex, lastQuotationIndex + 1).split("\"");
+        }catch (StringIndexOutOfBoundsException e){
+            print_ng("Error occurred while extracting hops and file name");
+        }
         ArrayList<String> fileList=new ArrayList<String>();
         for (String str:filesStr){
             fileList.add(str);
@@ -182,18 +186,20 @@ public class Util {
 
     public static String getHelpText(){
         StringBuilder sb=new StringBuilder();
-        sb.append("\t").append("reg server_ip").append("\t\t\t - ").append("register to Bootstrap server").append("\n");
+        sb.append("\t").append("reg server_ip").append("\t\t\t\t - ").append("register to Bootstrap server").append("\n");
         sb.append("\t").append("regl").append("\t\t\t\t\t - ").append("register to Bootstrap server running on same ip").append("\n");
         sb.append("\t").append("unreg").append("\t\t\t\t\t - ").append("unregister from Bootstrap server").append("\n");
         sb.append("\t").append("join").append("\t\t\t\t\t - ").append("join to neighbours in routing table").append("\n");
+        sb.append("\t").append("reqgossip").append("\t\t\t\t - ").append("requesting gossips from neighbours").append("\n");
         sb.append("\t").append("leave").append("\t\t\t\t\t - ").append("leave from neighbours").append("\n");
         sb.append("\t").append("table").append("\t\t\t\t\t - ").append("show routing table").append("\n");
         sb.append("\t").append("files").append("\t\t\t\t\t - ").append("show selected files").append("\n");
-        sb.append("\t").append("search file_name hops(optional)").append("\t - ").append("search files in network by name").append("\n");
+        sb.append("\t").append("search file_name hops(optional)").append("\t\t - ").append("search files in network by name").append("\n");
+        sb.append("\t").append("download file_download_url").append("\t\t - ").append("download a file from neighbour").append("\n");
         sb.append("\t").append("exit").append("\t\t\t\t\t - ").append("exit from application followed by 'unreg' and 'leave' ").append("\n");
         sb.append("\t  ____\n\n");
         sb.append("\t").append("help").append("\t\t\t\t\t - ").append("app commands (this)").append("\n");
-        sb.append("\t").append("setport port").append("\t\t\t - ").append("change port if registration failed").append("\n");
+        sb.append("\t").append("setport port").append("\t\t\t\t - ").append("change port if registration failed").append("\n");
         return sb.toString();
     }
 

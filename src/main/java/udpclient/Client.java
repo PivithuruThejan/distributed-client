@@ -8,6 +8,7 @@ import java.net.SocketException;
 import java.util.*;
 
 import static udpclient.Printer.*;
+import static udpclient.SendingMessageHandler.sendGossipRequest;
 import static udpclient.Util.*;
 
 public class Client {
@@ -140,6 +141,9 @@ public class Client {
                     case "files":
                         printSelectedFiles();
                         break;
+                    case "reqgossip":
+                        sendGossipRequest();
+                        break;
 
                     case "regl":
                         SendingMessageHandler.registerToBSonSameIp();
@@ -216,8 +220,14 @@ public class Client {
                         case "SER":
                             ReceivingMessageHandler.searchFileForNeighbour(st, incoming,msg);
                             break;
+
                         case "GOSSIP":
                             ReceivingMessageHandler.handleGossip(st,incoming,msg);
+                            break;
+
+                        case "GOSSIPREQ":
+                            ReceivingMessageHandler.handleGossipRequest(st);
+                            break;
 
                     }
                 }catch (NoSuchElementException e){

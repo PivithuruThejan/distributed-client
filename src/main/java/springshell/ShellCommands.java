@@ -10,6 +10,7 @@ import org.springframework.shell.standard.commands.Quit;
 import udpclient.SendingMessageHandler;
 
 import static udpclient.Printer.*;
+import static udpclient.SendingMessageHandler.sendGossipRequest;
 import static udpclient.Util.changeMyPort;
 import static udpclient.Util.getHelpText;
 
@@ -73,10 +74,17 @@ public class ShellCommands implements Quit.Command, Help.Command {
         System.exit(0);
     }
 
-    @ShellMethod(key="download" , value = "download a file froma given url")
+    @ShellMethod(key="download" , value = "download a file from a given url")
     public void downlaod(@ShellOption("--url") String urlStr){
 
         Downloader.downloadFile(urlStr);
+
+    }
+
+    @ShellMethod(key="reqgossip" , value = "requesting gossips from neighbours")
+    public void requestGossips(){
+
+        sendGossipRequest();
 
     }
 

@@ -198,8 +198,25 @@ public class SendingMessageHandler {
         }
     }
 
+    /**
+     * use this to request neighbour's table
+     */
+    public static void sendGossipRequest(){
+        // format
+        // length GOSSIPREQ IP Port
+        if (getRoutingTable().size()>0){
+            String msg="GOSSIPREQ "+myIp+" "+myPort;
+            String msg_formatted=formatMessage(msg);
+            for (Node neighbour:getRoutingTable().values()){
+                sendPacket(neighbour.getIp(),neighbour.getPort(),msg_formatted,"Gossip request");
+            }
+        }else {
+            print_nng("Routing table is empty.\nFirst register to Bootstrap server before requesting gossips");
+        }
+    }
 
-    private static void sendNeighboursToNeighbourMessage(Node nodeToBeSent, int neighbourCount,String neighboursDetails){
+
+    public static void sendNeighboursToNeighbourMessage(Node nodeToBeSent, int neighbourCount,String neighboursDetails){
         String msg="GOSSIP "+myIp+" "+myPort+" "+neighbourCount+" "+neighboursDetails;
         String msg_formatted=formatMessage(msg);
         sendPacket(nodeToBeSent.getIp(),nodeToBeSent.getPort(),msg_formatted,"Gossip");

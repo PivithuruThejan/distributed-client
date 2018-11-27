@@ -22,10 +22,12 @@ java -jar target/dsapp.jar
 | `regl`                           | register to bs in same ip           |                      |
 | `unreg`                          | unregister from bootstrap server    |                      |
 | `join`                           | sending join commands to neighbours |                      |
+| `reqgossip`                       | requesting gossips from neighbours |                      |
 | `leave`                          | sending leave commands to neighbours|                      |
 | `table`                          | show routing table                  |                      |
 | `files`                          | show selected files                 |                      |
-| `search file_name hops[optional]`| file search from neighbours, hops to go naighbours of neighbour | `search moon.jpg 3` |
+| `search file_name hops[optional]`| file search from neighbours, hops to go naighbours of neighbour | `search windows` |
+| `download file_download_url`     | download a file from neighbour      | `download http://10.10.6.35:8082/download?name="Windows XP"` |
 | `exit`                           | exit from application followed by 'unreg' and 'leave' |    |
 | `help`                           | show application commands           |                      |
 | `setport port`                   | hange port if registration failed   | `setport 5656`       |
